@@ -1,11 +1,11 @@
-import MoviesPage from "@/components/pages/movies-page"
 import Navbar from "@/components/navbar"
+import FavoritesPage from "@/components/pages/favorites-page"
 
-export default function Movies() {
+export default function Favorites() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-background via-background to-background">
       <Navbar />
-      <MoviesPage />
+      <FavoritesPage />
     </main>
   )
 }

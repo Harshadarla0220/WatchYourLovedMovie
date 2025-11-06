@@ -1,10 +1,19 @@
 "use client"
 
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { useState, useEffect } from "react"
+import { getFavorites } from "@/lib/favorites"
+import MovieCard from "@/components/movie-card"
+import BackToTop from "@/components/back-to-top"
+import type { FavoriteMovie } from "@/lib/favorites"
 
 export default function LandingPage() {
+  const [favorites, setFavorites] = useState<FavoriteMovie[]>([])
+
+  useEffect(() => {
+    setFavorites(getFavorites())
+  }, [])
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -19,27 +28,27 @@ export default function LandingPage() {
           </div>
 
           <h1 className="text-5xl sm:text-6xl font-bold text-foreground mb-6 leading-tight slide-up">
-            Discover Entertainment
+            Discover Movies
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-              That Matches Your Mood
+              That Match Your Taste
             </span>
           </h1>
 
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto slide-up">
-            MoodMate uses AI to recommend movies and music tailored to your current emotional state. Find your next
-            favorite in seconds.
+            Search millions of movies from OMDB database. Find your next favorite with powerful filters and personalized
+            recommendations.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 slide-up">
             <Link href="/movies">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-white hover-lift">
+              <button className="px-6 py-3 rounded-lg bg-primary hover:bg-primary/90 text-white font-semibold transition-all hover:shadow-lg hover:-translate-y-1">
                 Explore Movies
-              </Button>
+              </button>
             </Link>
-            <Link href="/music">
-              <Button size="lg" variant="outline" className="hover-lift bg-transparent">
-                Explore Music
-              </Button>
+            <Link href="/favorites">
+              <button className="px-6 py-3 rounded-lg border border-border hover:bg-accent/10 text-foreground font-semibold transition-all hover:shadow-lg hover:-translate-y-1">
+                View Favorites ❤️
+              </button>
             </Link>
           </div>
         </div>
@@ -51,76 +60,107 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-8 mb-16">
             {/* Movies Card */}
             <Link href="/movies">
-              <Card className="group cursor-pointer overflow-hidden hover:shadow-xl transition-all duration-300 h-full hover-lift scale-in">
+              <div className="group cursor-pointer overflow-hidden hover:shadow-xl transition-all duration-300 h-full hover-lift scale-in rounded-xl border border-border bg-card">
                 <div className="relative h-64 bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 group-hover:from-blue-500/20 group-hover:to-purple-500/20 transition-all" />
                   <span className="text-6xl">🎬</span>
                 </div>
                 <div className="p-8">
                   <h2 className="text-3xl font-bold text-foreground mb-3 flex items-center gap-2">
-                    <span>🎬</span> Movies
+                    <span>🎬</span> Browse Movies
                   </h2>
                   <p className="text-muted-foreground mb-4">
-                    Discover movies that match your current mood. From thrilling action to heartwarming romance.
+                    Search and discover millions of movies. Filter by year, genre, and more.
                   </p>
-                  <Button className="bg-primary hover:bg-primary/90 w-full">Get Movie Recommendations</Button>
+                  <button className="bg-primary hover:bg-primary/90 w-full py-2 rounded-lg text-white font-semibold transition-colors">
+                    Search Movies
+                  </button>
                 </div>
-              </Card>
+              </div>
             </Link>
 
-            {/* Music Card */}
-            <Link href="/music">
-              <Card className="group cursor-pointer overflow-hidden hover:shadow-xl transition-all duration-300 h-full hover-lift scale-in">
+            {/* Favorites Card */}
+            <Link href="/favorites">
+              <div className="group cursor-pointer overflow-hidden hover:shadow-xl transition-all duration-300 h-full hover-lift scale-in rounded-xl border border-border bg-card">
                 <div className="relative h-64 bg-gradient-to-br from-pink-500/20 to-orange-500/20 flex items-center justify-center overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-orange-500/10 group-hover:from-pink-500/20 group-hover:to-orange-500/20 transition-all" />
-                  <span className="text-6xl">🎵</span>
+                  <span className="text-6xl">❤️</span>
                 </div>
                 <div className="p-8">
                   <h2 className="text-3xl font-bold text-foreground mb-3 flex items-center gap-2">
-                    <span>🎵</span> Music
+                    <span>❤️</span> My Favorites ({favorites.length})
                   </h2>
                   <p className="text-muted-foreground mb-4">
-                    Listen to music that fits your feelings. Curated playlists for every mood and moment.
+                    View all your saved favorite movies in one place. Manage your collection.
                   </p>
-                  <Button className="bg-accent hover:bg-accent/90 w-full">Get Music Recommendations</Button>
+                  <button className="bg-accent hover:bg-accent/90 text-accent-foreground w-full py-2 rounded-lg font-semibold transition-colors">
+                    View Favorites
+                  </button>
                 </div>
-              </Card>
+              </div>
             </Link>
           </div>
 
+          {/* Favorites Section */}
+          {favorites.length > 0 && (
+            <div className="bg-card rounded-2xl p-8 border border-border fade-in">
+              <h3 className="text-2xl font-bold text-foreground mb-8">Your Recent Favorites</h3>
+              <div className="grid md:grid-cols-4 gap-4">
+                {favorites.slice(0, 4).map((movie) => (
+                  <MovieCard
+                    key={movie.imdbID}
+                    movie={{
+                      Title: movie.title,
+                      Year: movie.year,
+                      imdbID: movie.imdbID,
+                      Type: "movie",
+                      Poster: movie.poster,
+                      imdbRating: movie.rating,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Features Section */}
-          <div className="bg-card rounded-2xl p-8 border border-border fade-in">
+          <div className="bg-card rounded-2xl p-8 border border-border fade-in mt-16">
             <h3 className="text-2xl font-bold text-foreground mb-8 text-center">Why Choose MoodMate?</h3>
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center hover-lift">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <span className="text-xl">✨</span>
+                  <span className="text-xl">🔍</span>
                 </div>
-                <h4 className="font-semibold text-foreground mb-2">AI-Powered</h4>
+                <h4 className="font-semibold text-foreground mb-2">Powerful Search</h4>
                 <p className="text-muted-foreground text-sm">
-                  Advanced AI understands your mood and recommends perfect content
+                  Search millions of movies from OMDB with advanced filtering
                 </p>
               </div>
               <div className="text-center hover-lift">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <span className="text-xl">🎬</span>
+                  <span className="text-xl">❤️</span>
                 </div>
-                <h4 className="font-semibold text-foreground mb-2">Personalized</h4>
+                <h4 className="font-semibold text-foreground mb-2">Save Favorites</h4>
                 <p className="text-muted-foreground text-sm">
-                  Get recommendations tailored to your preferences and mood
+                  Add movies to favorites and build your personal watchlist
                 </p>
               </div>
               <div className="text-center hover-lift">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <span className="text-xl">🎵</span>
+                  <span className="text-xl">⭐</span>
                 </div>
-                <h4 className="font-semibold text-foreground mb-2">Diverse</h4>
-                <p className="text-muted-foreground text-sm">Movies and music in multiple languages and genres</p>
+                <h4 className="font-semibold text-foreground mb-2">See Ratings</h4>
+                <p className="text-muted-foreground text-sm">
+                  View IMDb ratings and detailed movie information instantly
+                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Back-to-top Button */}
+      <BackToTop />
     </div>
   )
 }

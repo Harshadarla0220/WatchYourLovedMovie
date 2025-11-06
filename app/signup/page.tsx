@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import Navbar from "@/components/navbar"
-import { createClient } from "@/lib/supabase/client"
+import { registerUser } from "@/lib/auth"
 
 export default function SignupPage() {
   const [displayName, setDisplayName] = useState("")
@@ -21,7 +21,6 @@ export default function SignupPage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
@@ -31,24 +30,21 @@ export default function SignupPage() {
       return
     }
 
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            display_name: displayName,
-          },
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
-        },
-      })
-      if (error) throw error
-      router.push("/signup-success")
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
-    } finally {
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters")
       setIsLoading(false)
+      return
     }
+
+    const success = registerUser(email, displayName, password)
+
+    if (success) {
+      router.push("/login")
+    } else {
+      setError("Email already registered")
+    }
+
+    setIsLoading(false)
   }
 
   return (

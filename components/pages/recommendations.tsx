@@ -173,11 +173,15 @@ export default function Recommendations({
                     <button
                       onClick={() => toggleFavorite(index, rec)}
                       disabled={isSaving}
-                      className={`flex-1 p-2 rounded-lg transition-all flex items-center justify-center gap-2 ${
-                        isFavorite ? "bg-red-500/20 text-red-500" : "bg-card border border-border hover:border-red-500"
+                      className={`flex-1 p-2 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 transform ${
+                        isFavorite
+                          ? "bg-red-500/20 text-red-500 scale-105"
+                          : "bg-card border border-border hover:border-red-500 hover:scale-105"
                       } ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
-                      <span>{isFavorite ? "❤️" : "🤍"}</span>
+                      <span className={`transition-transform duration-300 ${isFavorite ? "scale-125" : ""}`}>
+                        {isFavorite ? "❤️" : "🤍"}
+                      </span>
                       {isSaving ? "Saving..." : ""}
                     </button>
                   </div>

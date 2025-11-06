@@ -2,31 +2,24 @@
 
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
+import { getCurrentUser, logoutUser } from "@/lib/auth"
+import ThemeToggle from "@/components/theme-toggle"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
-  const [user, setUser] = useState<{ email?: string } | null>(null)
+  const [user, setUser] = useState<{ email?: string; displayName?: string } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
-    const checkUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      setUser(user)
-      setIsLoading(false)
-    }
+    const currentUser = getCurrentUser()
+    setUser(currentUser)
+    setIsLoading(false)
+  }, [])
 
-    checkUser()
-  }, [supabase])
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
+  const handleLogout = () => {
+    logoutUser()
     setUser(null)
     router.push("/")
   }
@@ -34,20 +27,15 @@ export default function Navbar() {
   const navItems = [
     { label: "Home", href: "/" },
     { label: "Movies", href: "/movies" },
-    { label: "Music", href: "/music" },
   ]
 
-  const authenticatedNavItems = [
-    { label: "Favorites", href: "/favorites" },
-    { label: "History", href: "/history" },
-    { label: "Profile", href: "/profile" },
-  ]
+  const authenticatedNavItems = [{ label: "Favorites", href: "/favorites" }]
 
   return (
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link href="/" className="flex items-center gap-2 hover-lift">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">M</span>
             </div>
@@ -58,43 +46,50 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-1">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href}>
-                <Button variant="ghost" className="text-foreground hover:text-primary transition-colors">
+                <button className="px-3 py-2 rounded-lg text-foreground hover:bg-accent/10 transition-colors">
                   {item.label}
-                </Button>
+                </button>
               </Link>
             ))}
             {user &&
               authenticatedNavItems.map((item) => (
                 <Link key={item.href} href={item.href}>
-                  <Button variant="ghost" className="text-foreground hover:text-primary transition-colors">
+                  <button className="px-3 py-2 rounded-lg text-foreground hover:bg-accent/10 transition-colors">
                     {item.label}
-                  </Button>
+                  </button>
                 </Link>
               ))}
           </div>
 
           {/* Auth Buttons / User Menu */}
           <div className="hidden md:flex items-center gap-2">
+            {/* Theme toggle button */}
+            <ThemeToggle />
+
             {!isLoading && user ? (
               <>
-                <Link href="/profile">
-                  <Button variant="ghost" className="flex items-center gap-2">
-                    <span>👤</span>
-                    {user.email?.split("@")[0]}
-                  </Button>
-                </Link>
-                <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2 bg-transparent">
+                <div className="flex items-center gap-2 mr-2">
+                  <span className="text-foreground font-medium">{user.displayName}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="px-3 py-2 rounded-lg border border-border hover:bg-accent/10 transition-colors flex items-center gap-2 bg-transparent"
+                >
                   <span>🚪</span>
                   Logout
-                </Button>
+                </button>
               </>
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="outline">Login</Button>
+                  <button className="px-3 py-2 rounded-lg border border-border hover:bg-accent/10 transition-colors">
+                    Login
+                  </button>
                 </Link>
                 <Link href="/signup">
-                  <Button className="bg-primary hover:bg-primary/90">Sign Up</Button>
+                  <button className="px-3 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-colors">
+                    Sign Up
+                  </button>
                 </Link>
               </>
             )}
@@ -111,45 +106,22 @@ export default function Navbar() {
           <div className="md:hidden pb-4 space-y-2 animate-in slide-in-from-top-2 duration-300">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href}>
-                <Button variant="ghost" className="w-full justify-start text-foreground">
+                <button className="w-full justify-start px-3 py-2 rounded-lg text-foreground hover:bg-accent/10">
                   {item.label}
-                </Button>
+                </button>
               </Link>
             ))}
             {user &&
               authenticatedNavItems.map((item) => (
                 <Link key={item.href} href={item.href}>
-                  <Button variant="ghost" className="w-full justify-start text-foreground">
+                  <button className="w-full justify-start px-3 py-2 rounded-lg text-foreground hover:bg-accent/10">
                     {item.label}
-                  </Button>
+                  </button>
                 </Link>
               ))}
-            <div className="flex gap-2 pt-2 flex-col">
-              {!isLoading && user ? (
-                <>
-                  <Link href="/profile" className="w-full">
-                    <Button variant="outline" className="w-full bg-transparent justify-start">
-                      <span className="mr-2">👤</span>
-                      Profile
-                    </Button>
-                  </Link>
-                  <Button variant="outline" onClick={handleLogout} className="w-full bg-transparent justify-start">
-                    <span className="mr-2">🚪</span>
-                    Logout
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Link href="/login" className="w-full">
-                    <Button variant="outline" className="w-full bg-transparent">
-                      Login
-                    </Button>
-                  </Link>
-                  <Link href="/signup" className="w-full">
-                    <Button className="w-full bg-primary hover:bg-primary/90">Sign Up</Button>
-                  </Link>
-                </>
-              )}
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-sm text-muted-foreground">Theme</span>
+              <ThemeToggle />
             </div>
           </div>
         )}

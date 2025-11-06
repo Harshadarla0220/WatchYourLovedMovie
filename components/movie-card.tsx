@@ -1,74 +1,77 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { addFavorite, removeFavorite, isFavorite } from "@/lib/favorites"
-import type { OmdbMovie } from "@/lib/omdb/client"
+import type { EnrichedMovie } from "@/lib/tmdb/client"
 
 interface MovieCardProps {
-  movie: OmdbMovie
+  movie: EnrichedMovie
+  onMovieClick?: (movie: EnrichedMovie) => void
   onFavoriteChange?: () => void
 }
 
-export default function MovieCard({ movie, onFavoriteChange }: MovieCardProps) {
-  const [isFav, setIsFav] = useState(() => isFavorite(movie.imdbID))
+export default function MovieCard({ movie, onMovieClick, onFavoriteChange }: MovieCardProps) {
+  const [isFav, setIsFav] = useState(() => isFavorite(String(movie.id)))
   const [isAnimating, setIsAnimating] = useState(false)
 
-  const handleToggleFavorite = () => {
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation()
     setIsAnimating(true)
     setTimeout(() => setIsAnimating(false), 300)
 
+    const movieId = String(movie.id)
     if (isFav) {
-      removeFavorite(movie.imdbID)
+      removeFavorite(movieId)
       setIsFav(false)
     } else {
       addFavorite({
-        imdbID: movie.imdbID,
-        title: movie.Title,
-        poster: movie.Poster,
-        rating: movie.imdbRating || "N/A",
-        year: movie.Year,
+        imdbID: movieId,
+        title: movie.title,
+        poster: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+        rating: movie.imdbRating || String(movie.vote_average.toFixed(1)),
+        year: String(movie.release_date?.split("-")[0] || "N/A"),
       })
       setIsFav(true)
     }
     onFavoriteChange?.()
   }
 
+  const posterUrl = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "/placeholder.svg"
+
   return (
-    <div className="overflow-hidden hover-lift group cursor-pointer transition-all duration-300 h-full flex flex-col bg-card border border-border rounded-xl">
+    <div
+      className="overflow-hidden hover-lift group cursor-pointer transition-all duration-300 h-full flex flex-col bg-card border border-border rounded-xl hover:border-primary"
+      onClick={() => onMovieClick?.(movie)}
+    >
       {/* Movie Poster */}
       <div className="relative h-64 bg-muted overflow-hidden">
-        {movie.Poster && movie.Poster !== "N/A" ? (
-          <img
-            src={movie.Poster || "/placeholder.svg"}
-            alt={movie.Title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-primary/10 to-accent/10">
-            🎬
-          </div>
-        )}
+        <img
+          src={posterUrl || "/placeholder.svg"}
+          alt={movie.title}
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+          loading="lazy"
+        />
       </div>
 
       {/* Movie Info */}
       <div className="p-4 flex-1 flex flex-col">
-        <h3 className="font-bold text-foreground mb-2 line-clamp-2 text-balance">{movie.Title}</h3>
+        <h3 className="font-bold text-foreground mb-2 line-clamp-2 text-balance">{movie.title}</h3>
 
-        <div className="space-y-2 mb-4 flex-1">
-          <p className="text-sm text-muted-foreground">
-            <span className="font-semibold">Year:</span> {movie.Year}
+        <div className="space-y-2 mb-4 flex-1 text-sm">
+          <p className="text-muted-foreground">
+            <span className="font-semibold">Year:</span> {movie.release_date?.split("-")[0] || "N/A"}
           </p>
-          {movie.imdbRating && movie.imdbRating !== "N/A" && (
-            <p className="text-sm text-muted-foreground">
-              <span className="font-semibold">Rating:</span> ⭐ {movie.imdbRating}/10
-            </p>
-          )}
+          <p className="text-muted-foreground">
+            <span className="font-semibold">Rating:</span> ⭐ {movie.vote_average?.toFixed(1) || "N/A"}/10
+          </p>
           {movie.Runtime && movie.Runtime !== "N/A" && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground">
               <span className="font-semibold">Runtime:</span> {movie.Runtime}
             </p>
           )}
+          <p className="text-muted-foreground line-clamp-2">{movie.overview}</p>
         </div>
 
         <button

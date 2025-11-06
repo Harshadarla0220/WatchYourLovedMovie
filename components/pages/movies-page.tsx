@@ -1,33 +1,48 @@
 "use client"
 
 import { useState } from "react"
-import { searchMovies, getMoviesByGenre } from "@/lib/omdb/client"
+import { getTrendingMovies, getMoviesByGenre, enrichMovieWithOmdb } from "@/lib/tmdb/client"
 import MovieCard from "@/components/movie-card"
 import SearchBar from "@/components/search-bar"
 import Filters from "@/components/filters"
 import TrendingMovies from "@/components/trending-movies"
 import BackToTop from "@/components/back-to-top"
-import type { OmdbMovie } from "@/lib/omdb/client"
+import MovieDetailModal from "@/components/movie-detail-modal"
+import type { EnrichedMovie } from "@/lib/tmdb/client"
 
 export default function MoviesPage() {
-  const [movies, setMovies] = useState<OmdbMovie[]>([])
+  const [movies, setMovies] = useState<EnrichedMovie[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [hasSearched, setHasSearched] = useState(false)
   const [selectedYearRange, setSelectedYearRange] = useState("")
   const [selectedGenre, setSelectedGenre] = useState("")
+  const [selectedLanguage, setSelectedLanguage] = useState("en-US")
+  const [selectedMovie, setSelectedMovie] = useState<EnrichedMovie | null>(null)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
 
-  const parseYearRange = (range: string): string | undefined => {
-    if (!range) return undefined
+  const parseYearRange = (range: string): { start?: string; end?: string } => {
+    if (!range) return {}
     const [start, end] = range.split("-")
-    return start
+    return { start, end }
+  }
+
+  const enrichMovies = async (moviesToEnrich: EnrichedMovie[]) => {
+    const enriched = await Promise.all(
+      moviesToEnrich.map(async (movie) => {
+        const omdbData = await enrichMovieWithOmdb(movie.title, movie.release_date?.split("-")[0])
+        return { ...movie, ...omdbData }
+      }),
+    )
+    return enriched
   }
 
   const handleSearch = async (query: string) => {
     setIsLoading(true)
     setHasSearched(true)
-    const year = parseYearRange(selectedYearRange)
-    const results = await searchMovies(query, year)
-    setMovies(results)
+    // Use trending as search fallback for now
+    const results = await getTrendingMovies(selectedLanguage)
+    const enriched = await enrichMovies(results)
+    setMovies(enriched)
     setIsLoading(false)
   }
 
@@ -40,11 +55,21 @@ export default function MoviesPage() {
     if (genre) {
       setIsLoading(true)
       setHasSearched(true)
-      const year = parseYearRange(selectedYearRange)
-      const results = await getMoviesByGenre(genre, year)
-      setMovies(results)
+      const { start, end } = parseYearRange(selectedYearRange)
+      const results = await getMoviesByGenre(genre, selectedLanguage, start, end)
+      const enriched = await enrichMovies(results)
+      setMovies(enriched)
       setIsLoading(false)
     }
+  }
+
+  const handleLanguageChange = (language: string) => {
+    setSelectedLanguage(language)
+  }
+
+  const handleMovieClick = (movie: EnrichedMovie) => {
+    setSelectedMovie(movie)
+    setIsDetailModalOpen(true)
   }
 
   return (
@@ -54,7 +79,7 @@ export default function MoviesPage() {
         <div className="mb-12 space-y-6">
           <div>
             <h1 className="text-4xl font-bold text-foreground mb-2">Find Your Next Movie</h1>
-            <p className="text-muted-foreground">Search millions of movies from OMDB database</p>
+            <p className="text-muted-foreground">Discover movies filtered by genre, year, and language</p>
           </div>
 
           <SearchBar onSearch={handleSearch} isLoading={isLoading} />
@@ -62,8 +87,10 @@ export default function MoviesPage() {
           <Filters
             onYearRangeChange={handleYearRangeChange}
             onGenreChange={handleGenreChange}
+            onLanguageChange={handleLanguageChange}
             selectedYearRange={selectedYearRange}
             selectedGenre={selectedGenre}
+            selectedLanguage={selectedLanguage}
           />
         </div>
 
@@ -80,7 +107,12 @@ export default function MoviesPage() {
             ) : movies.length > 0 ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {movies.map((movie) => (
-                  <MovieCard key={movie.imdbID} movie={movie} />
+                  <MovieCard
+                    key={movie.id}
+                    movie={movie}
+                    onMovieClick={handleMovieClick}
+                    onFavoriteChange={() => setMovies([...movies])}
+                  />
                 ))}
               </div>
             ) : (
@@ -91,12 +123,13 @@ export default function MoviesPage() {
           </div>
         ) : (
           <div className="space-y-16">
-            <TrendingMovies />
+            <TrendingMovies onMovieClick={handleMovieClick} />
           </div>
         )}
       </div>
 
       <BackToTop />
+      <MovieDetailModal movie={selectedMovie} isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} />
     </main>
   )
 }

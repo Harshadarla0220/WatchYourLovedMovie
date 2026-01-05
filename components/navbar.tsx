@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { getCurrentUser, logoutUser } from "@/lib/auth"
 import ThemeToggle from "@/components/theme-toggle"
 
@@ -10,7 +10,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [user, setUser] = useState<{ email?: string; displayName?: string } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     const currentUser = getCurrentUser()
@@ -21,7 +21,6 @@ export default function Navbar() {
   const handleLogout = () => {
     logoutUser()
     setUser(null)
-    router.push("/")
   }
 
   const navItems = [
@@ -30,6 +29,11 @@ export default function Navbar() {
   ]
 
   const authenticatedNavItems = [{ label: "Favorites", href: "/favorites" }]
+
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/"
+    return pathname.startsWith(href)
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -46,7 +50,13 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-1">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href}>
-                <button className="px-3 py-2 rounded-lg text-foreground hover:bg-accent/10 transition-colors">
+                <button
+                  className={`px-3 py-2 rounded-lg transition-colors ${
+                    isActive(item.href)
+                      ? "bg-primary/20 text-primary font-semibold"
+                      : "text-foreground hover:bg-accent/10"
+                  }`}
+                >
                   {item.label}
                 </button>
               </Link>
@@ -54,7 +64,13 @@ export default function Navbar() {
             {user &&
               authenticatedNavItems.map((item) => (
                 <Link key={item.href} href={item.href}>
-                  <button className="px-3 py-2 rounded-lg text-foreground hover:bg-accent/10 transition-colors">
+                  <button
+                    className={`px-3 py-2 rounded-lg transition-colors ${
+                      isActive(item.href)
+                        ? "bg-primary/20 text-primary font-semibold"
+                        : "text-foreground hover:bg-accent/10"
+                    }`}
+                  >
                     {item.label}
                   </button>
                 </Link>
@@ -63,7 +79,6 @@ export default function Navbar() {
 
           {/* Auth Buttons / User Menu */}
           <div className="hidden md:flex items-center gap-2">
-            {/* Theme toggle button */}
             <ThemeToggle />
 
             {!isLoading && user ? (
@@ -106,7 +121,13 @@ export default function Navbar() {
           <div className="md:hidden pb-4 space-y-2 animate-in slide-in-from-top-2 duration-300">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href}>
-                <button className="w-full justify-start px-3 py-2 rounded-lg text-foreground hover:bg-accent/10">
+                <button
+                  className={`w-full justify-start px-3 py-2 rounded-lg transition-colors ${
+                    isActive(item.href)
+                      ? "bg-primary/20 text-primary font-semibold"
+                      : "text-foreground hover:bg-accent/10"
+                  }`}
+                >
                   {item.label}
                 </button>
               </Link>
@@ -114,7 +135,13 @@ export default function Navbar() {
             {user &&
               authenticatedNavItems.map((item) => (
                 <Link key={item.href} href={item.href}>
-                  <button className="w-full justify-start px-3 py-2 rounded-lg text-foreground hover:bg-accent/10">
+                  <button
+                    className={`w-full justify-start px-3 py-2 rounded-lg transition-colors ${
+                      isActive(item.href)
+                        ? "bg-primary/20 text-primary font-semibold"
+                        : "text-foreground hover:bg-accent/10"
+                    }`}
+                  >
                     {item.label}
                   </button>
                 </Link>

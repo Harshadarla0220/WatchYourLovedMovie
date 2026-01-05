@@ -5,11 +5,7 @@ import { getTrendingMovies, enrichMovieWithOmdb } from "@/lib/tmdb/client"
 import MovieCard from "@/components/movie-card"
 import type { EnrichedMovie } from "@/lib/tmdb/client"
 
-interface TrendingMoviesProps {
-  onMovieClick?: (movie: EnrichedMovie) => void
-}
-
-export default function TrendingMovies({ onMovieClick }: TrendingMoviesProps) {
+export default function TrendingMovies() {
   const [movies, setMovies] = useState<EnrichedMovie[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -46,7 +42,7 @@ export default function TrendingMovies({ onMovieClick }: TrendingMoviesProps) {
       <h2 className="text-3xl font-bold text-foreground mb-8">Trending Now</h2>
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {movies.map((movie) => (
-          <MovieCard key={movie.id} movie={movie} onMovieClick={onMovieClick} />
+          <MovieCard key={movie.id} movie={movie} />
         ))}
       </div>
     </div>

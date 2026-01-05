@@ -7,7 +7,6 @@ import SearchBar from "@/components/search-bar"
 import Filters from "@/components/filters"
 import TrendingMovies from "@/components/trending-movies"
 import BackToTop from "@/components/back-to-top"
-import MovieDetailModal from "@/components/movie-detail-modal"
 import type { EnrichedMovie } from "@/lib/tmdb/client"
 
 export default function MoviesPage() {
@@ -17,8 +16,6 @@ export default function MoviesPage() {
   const [selectedYearRange, setSelectedYearRange] = useState("")
   const [selectedGenre, setSelectedGenre] = useState("")
   const [selectedLanguage, setSelectedLanguage] = useState("en-US")
-  const [selectedMovie, setSelectedMovie] = useState<EnrichedMovie | null>(null)
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
 
   const parseYearRange = (range: string): { start?: string; end?: string } => {
     if (!range) return {}
@@ -39,7 +36,6 @@ export default function MoviesPage() {
   const handleSearch = async (query: string) => {
     setIsLoading(true)
     setHasSearched(true)
-    // Use trending as search fallback for now
     const results = await getTrendingMovies(selectedLanguage)
     const enriched = await enrichMovies(results)
     setMovies(enriched)
@@ -65,11 +61,6 @@ export default function MoviesPage() {
 
   const handleLanguageChange = (language: string) => {
     setSelectedLanguage(language)
-  }
-
-  const handleMovieClick = (movie: EnrichedMovie) => {
-    setSelectedMovie(movie)
-    setIsDetailModalOpen(true)
   }
 
   return (
@@ -107,12 +98,7 @@ export default function MoviesPage() {
             ) : movies.length > 0 ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {movies.map((movie) => (
-                  <MovieCard
-                    key={movie.id}
-                    movie={movie}
-                    onMovieClick={handleMovieClick}
-                    onFavoriteChange={() => setMovies([...movies])}
-                  />
+                  <MovieCard key={movie.id} movie={movie} onFavoriteChange={() => setMovies([...movies])} />
                 ))}
               </div>
             ) : (
@@ -123,13 +109,12 @@ export default function MoviesPage() {
           </div>
         ) : (
           <div className="space-y-16">
-            <TrendingMovies onMovieClick={handleMovieClick} />
+            <TrendingMovies />
           </div>
         )}
       </div>
 
       <BackToTop />
-      <MovieDetailModal movie={selectedMovie} isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} />
     </main>
   )
 }

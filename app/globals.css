@@ -22,14 +22,6 @@
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
 }
 
 /* Dark mode theme variables */
@@ -114,13 +106,13 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50;
   }
 }
 
 @layer components {
   .gradient-mood {
-    @apply bg-gradient-to-br from-primary/10 via-transparent to-accent/10;
+    @apply bg-gradient-to-br from-blue-50 via-transparent to-purple-50 dark:from-blue-900/10 dark:via-transparent dark:to-purple-900/10;
   }
 
   /* Animation utilities for smooth transitions */
@@ -137,10 +129,35 @@
   }
 
   .pulse-glow {
-    @apply animate-pulse shadow-lg shadow-primary/50;
+    @apply animate-pulse shadow-lg shadow-blue-500/50 dark:shadow-blue-400/50;
   }
 
   .hover-lift {
     @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+  }
+
+  /* External link icon styling */
+  .external-link-icon::after {
+    content: " ↗";
+    font-size: 0.875em;
+    opacity: 0.8;
+  }
+
+  /* Disabled button state styling */
+  .button-disabled {
+    @apply opacity-50 cursor-not-allowed bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600;
+  }
+
+  /* Updated button styles with proper dark mode contrast */
+  .button-primary {
+    @apply px-4 py-2 rounded-lg font-semibold transition-all duration-200;
+    @apply bg-blue-600 text-white hover:bg-blue-700 dark:bg-white dark:text-blue-600 dark:hover:bg-gray-100;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .button-secondary {
+    @apply px-4 py-2 rounded-lg font-semibold transition-all duration-200;
+    @apply border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
   }
 }

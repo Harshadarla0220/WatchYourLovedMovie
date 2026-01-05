@@ -17,36 +17,37 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 blur-3xl" />
 
         <div className="relative max-w-7xl mx-auto text-center fade-in">
           <div className="mb-8 inline-block slide-up">
-            <span className="px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold">
-              ✨ Your Mood. Your Moment. Your Recommendation.
+            <span className="px-4 py-2 rounded-full bg-primary/10 text-primary dark:bg-white/10 dark:text-white text-sm font-semibold">
+              ✨ Discover Your Next Favorite
             </span>
           </div>
 
-          <h1 className="text-5xl sm:text-6xl font-bold text-foreground mb-6 leading-tight slide-up">
-            Discover Movies
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-              That Match Your Taste
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-foreground dark:text-white mb-6 leading-tight slide-up">
+            Your Mood.
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent dark:from-white dark:to-gray-300">
+              Your Moment.
             </span>
+            Your Perfect Movie.
           </h1>
 
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto slide-up">
-            Search millions of movies from OMDB database. Find your next favorite with powerful filters and personalized
-            recommendations.
+          <p className="text-xl text-gray-700 dark:text-gray-300 mb-8 max-w-2xl mx-auto slide-up">
+            Discover movies that match your mood and moment. Explore trending films, check where to watch, and build
+            your perfect watchlist.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 slide-up">
             <Link href="/movies">
-              <button className="px-6 py-3 rounded-lg bg-primary hover:bg-primary/90 text-white font-semibold transition-all hover:shadow-lg hover:-translate-y-1">
+              <button className="button-primary w-full sm:w-auto text-lg hover:shadow-lg hover:-translate-y-1">
                 Explore Movies
               </button>
             </Link>
             <Link href="/favorites">
-              <button className="px-6 py-3 rounded-lg border border-border hover:bg-accent/10 text-foreground font-semibold transition-all hover:shadow-lg hover:-translate-y-1">
+              <button className="button-secondary w-full sm:w-auto text-lg hover:shadow-lg hover:-translate-y-1">
                 View Favorites ❤️
               </button>
             </Link>
@@ -60,42 +61,38 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-8 mb-16">
             {/* Movies Card */}
             <Link href="/movies">
-              <div className="group cursor-pointer overflow-hidden hover:shadow-xl transition-all duration-300 h-full hover-lift scale-in rounded-xl border border-border bg-card">
-                <div className="relative h-64 bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 group-hover:from-blue-500/20 group-hover:to-purple-500/20 transition-all" />
+              <div className="group cursor-pointer overflow-hidden hover:shadow-xl transition-all duration-300 h-full hover-lift scale-in rounded-xl border border-border bg-card dark:bg-gray-900 dark:border-gray-700">
+                <div className="relative h-64 bg-gradient-to-br from-blue-500/20 to-purple-500/20 dark:from-blue-500/10 dark:to-purple-500/10 flex items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-500/5 dark:to-purple-500/5 group-hover:from-blue-500/20 group-hover:to-purple-500/20 transition-all" />
                   <span className="text-6xl">🎬</span>
                 </div>
                 <div className="p-8">
-                  <h2 className="text-3xl font-bold text-foreground mb-3 flex items-center gap-2">
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                     <span>🎬</span> Browse Movies
                   </h2>
-                  <p className="text-muted-foreground mb-4">
+                  <p className="text-gray-700 dark:text-gray-400 mb-4">
                     Search and discover millions of movies. Filter by year, genre, and more.
                   </p>
-                  <button className="bg-primary hover:bg-primary/90 w-full py-2 rounded-lg text-white font-semibold transition-colors">
-                    Search Movies
-                  </button>
+                  <button className="button-primary w-full hover:shadow-lg">Search Movies</button>
                 </div>
               </div>
             </Link>
 
             {/* Favorites Card */}
             <Link href="/favorites">
-              <div className="group cursor-pointer overflow-hidden hover:shadow-xl transition-all duration-300 h-full hover-lift scale-in rounded-xl border border-border bg-card">
-                <div className="relative h-64 bg-gradient-to-br from-pink-500/20 to-orange-500/20 flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-orange-500/10 group-hover:from-pink-500/20 group-hover:to-orange-500/20 transition-all" />
+              <div className="group cursor-pointer overflow-hidden hover:shadow-xl transition-all duration-300 h-full hover-lift scale-in rounded-xl border border-border bg-card dark:bg-gray-900 dark:border-gray-700">
+                <div className="relative h-64 bg-gradient-to-br from-pink-500/20 to-orange-500/20 dark:from-pink-500/10 dark:to-orange-500/10 flex items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-orange-500/10 dark:from-pink-500/5 dark:to-orange-500/5 group-hover:from-pink-500/20 group-hover:to-orange-500/20 transition-all" />
                   <span className="text-6xl">❤️</span>
                 </div>
                 <div className="p-8">
-                  <h2 className="text-3xl font-bold text-foreground mb-3 flex items-center gap-2">
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                     <span>❤️</span> My Favorites ({favorites.length})
                   </h2>
-                  <p className="text-muted-foreground mb-4">
+                  <p className="text-gray-700 dark:text-gray-400 mb-4">
                     View all your saved favorite movies in one place. Manage your collection.
                   </p>
-                  <button className="bg-accent hover:bg-accent/90 text-accent-foreground w-full py-2 rounded-lg font-semibold transition-colors">
-                    View Favorites
-                  </button>
+                  <button className="button-primary w-full hover:shadow-lg">View Favorites</button>
                 </div>
               </div>
             </Link>
@@ -103,8 +100,8 @@ export default function LandingPage() {
 
           {/* Favorites Section */}
           {favorites.length > 0 && (
-            <div className="bg-card rounded-2xl p-8 border border-border fade-in">
-              <h3 className="text-2xl font-bold text-foreground mb-8">Your Recent Favorites</h3>
+            <div className="bg-card dark:bg-gray-900 rounded-2xl p-8 border border-border dark:border-gray-700 fade-in">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Your Recent Favorites</h3>
               <div className="grid md:grid-cols-4 gap-4">
                 {favorites.slice(0, 4).map((movie) => (
                   <MovieCard
@@ -124,34 +121,34 @@ export default function LandingPage() {
           )}
 
           {/* Features Section */}
-          <div className="bg-card rounded-2xl p-8 border border-border fade-in mt-16">
-            <h3 className="text-2xl font-bold text-foreground mb-8 text-center">Why Choose MoodMate?</h3>
+          <div className="bg-card dark:bg-gray-900 rounded-2xl p-8 border border-border dark:border-gray-700 fade-in mt-16">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">Why Choose MoodMate?</h3>
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center hover-lift">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <span className="text-xl">🔍</span>
                 </div>
-                <h4 className="font-semibold text-foreground mb-2">Powerful Search</h4>
-                <p className="text-muted-foreground text-sm">
-                  Search millions of movies from OMDB with advanced filtering
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Powerful Search</h4>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Search millions of movies from TMDB with advanced filtering
                 </p>
               </div>
               <div className="text-center hover-lift">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <span className="text-xl">❤️</span>
                 </div>
-                <h4 className="font-semibold text-foreground mb-2">Save Favorites</h4>
-                <p className="text-muted-foreground text-sm">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Save Favorites</h4>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
                   Add movies to favorites and build your personal watchlist
                 </p>
               </div>
               <div className="text-center hover-lift">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <span className="text-xl">⭐</span>
                 </div>
-                <h4 className="font-semibold text-foreground mb-2">See Ratings</h4>
-                <p className="text-muted-foreground text-sm">
-                  View IMDb ratings and detailed movie information instantly
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-2">See Ratings</h4>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  View TMDB ratings and detailed movie information instantly
                 </p>
               </div>
             </div>

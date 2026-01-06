@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server"
 
-const TMDB_API_KEY = "a3403cf3418752d8d73b9c9cc1f57858"
+const TMDB_API_KEY = process.env.TMDB_API_KEY
 const TMDB_BASE_URL = "https://api.themoviedb.org/3"
 
 export async function GET(request: Request) {
   try {
+    if (!TMDB_API_KEY) {
+      console.error("[v0] TMDB API key is not configured")
+      return NextResponse.json({ error: "TMDB API key is not configured" }, { status: 500 })
+    }
+
     const { searchParams } = new URL(request.url)
     const language = searchParams.get("language") || "en-US"
     const yearStart = searchParams.get("yearStart")
@@ -17,6 +22,12 @@ export async function GET(request: Request) {
     }
 
     const response = await fetch(url)
+
+    if (!response.ok) {
+      console.error("[v0] TMDB API error:", response.status, response.statusText)
+      return NextResponse.json({ error: `TMDB API error: ${response.statusText}` }, { status: response.status })
+    }
+
     const data = await response.json()
 
     return NextResponse.json(data.results || [])

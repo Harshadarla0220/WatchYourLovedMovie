@@ -4,7 +4,6 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { getCurrentUser, logoutUser } from "@/lib/auth"
-import ThemeToggle from "@/components/theme-toggle"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -79,8 +78,6 @@ export default function Navbar() {
 
           {/* Auth Buttons / User Menu */}
           <div className="hidden md:flex items-center gap-2">
-            <ThemeToggle />
-
             {!isLoading && user ? (
               <>
                 <div className="flex items-center gap-2 mr-2">
@@ -148,7 +145,6 @@ export default function Navbar() {
               ))}
             <div className="flex items-center justify-between pt-2">
               <span className="text-sm text-muted-foreground">Theme</span>
-              <ThemeToggle />
             </div>
           </div>
         )}

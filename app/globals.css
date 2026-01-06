@@ -1,30 +1,45 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  /* Dark mode only configuration */
+  --background: #1a1a1a;
+  --foreground: #ffffff;
+  --card: #242424;
+  --card-foreground: #ffffff;
+  --popover: #1a1a1a;
+  --popover-foreground: #ffffff;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #404040;
+  --secondary-foreground: #ffffff;
+  --muted: #404040;
+  --muted-foreground: #a0a0a0;
+  --accent: #3b82f6;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #404040;
+  --input: #404040;
+  --ring: #3b82f6;
   --radius: 0.625rem;
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
-/* Dark mode theme variables */
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -61,6 +76,7 @@
 }
 
 @theme inline {
+  /* optional: --font-sans, --font-serif, --font-mono if they are applied in the layout.tsx */
   --font-sans: "Geist", "Geist Fallback";
   --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
@@ -106,58 +122,85 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50;
+    @apply bg-background text-foreground;
   }
 }
 
 @layer components {
   .gradient-mood {
-    @apply bg-gradient-to-br from-blue-50 via-transparent to-purple-50 dark:from-blue-900/10 dark:via-transparent dark:to-purple-900/10;
+    @apply bg-gradient-to-br from-blue-900/10 via-transparent to-purple-900/10;
   }
 
-  /* Animation utilities for smooth transitions */
   .fade-in {
-    @apply animate-in fade-in duration-500;
+    animation: fadeIn 0.5s ease-in;
   }
 
   .slide-up {
-    @apply animate-in slide-in-from-bottom-4 duration-500;
+    animation: slideUp 0.5s ease-out;
   }
 
   .scale-in {
-    @apply animate-in zoom-in duration-300;
+    animation: scaleIn 0.3s ease-out;
   }
 
   .pulse-glow {
-    @apply animate-pulse shadow-lg shadow-blue-500/50 dark:shadow-blue-400/50;
+    @apply animate-pulse shadow-lg shadow-blue-400/50;
   }
 
   .hover-lift {
     @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
   }
 
-  /* External link icon styling */
   .external-link-icon::after {
     content: " ↗";
     font-size: 0.875em;
     opacity: 0.8;
   }
 
-  /* Disabled button state styling */
   .button-disabled {
-    @apply opacity-50 cursor-not-allowed bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600;
+    @apply opacity-50 cursor-not-allowed bg-gray-700 text-gray-400 border-gray-600;
   }
 
-  /* Updated button styles with proper dark mode contrast */
   .button-primary {
     @apply px-4 py-2 rounded-lg font-semibold transition-all duration-200;
-    @apply bg-blue-600 text-white hover:bg-blue-700 dark:bg-white dark:text-blue-600 dark:hover:bg-gray-100;
+    @apply bg-blue-600 text-white hover:bg-blue-700;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .button-secondary {
     @apply px-4 py-2 rounded-lg font-semibold transition-all duration-200;
-    @apply border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800;
+    @apply border border-gray-600 bg-gray-900 text-white hover:bg-gray-800;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }

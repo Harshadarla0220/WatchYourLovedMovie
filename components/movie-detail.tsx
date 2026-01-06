@@ -28,6 +28,7 @@ export default function MovieDetail({ movieId, onBack }: MovieDetailProps) {
   const [movie, setMovie] = useState<EnrichedMovie | null>(null)
   const [watchProviders, setWatchProviders] = useState<WatchData | null>(null)
   const [recommendations, setRecommendations] = useState<TmdbMovie[]>([])
+  const [videoKey, setVideoKey] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedMovie, setSelectedMovie] = useState<EnrichedMovie | null>(null)
 
@@ -40,6 +41,7 @@ export default function MovieDetail({ movieId, onBack }: MovieDetailProps) {
         setMovie(data.movie)
         setWatchProviders(data.watchProviders)
         setRecommendations(data.recommendations || [])
+        setVideoKey(data.videoKey)
       } catch (error) {
         console.error("[v0] Error fetching movie details:", error)
       } finally {
@@ -64,7 +66,7 @@ export default function MovieDetail({ movieId, onBack }: MovieDetailProps) {
   if (!movie) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-700 dark:text-gray-300">Movie not found</p>
+        <p className="text-gray-400">Movie not found</p>
         <button onClick={onBack} className="button-primary mt-4">
           Go Back
         </button>
@@ -97,27 +99,23 @@ export default function MovieDetail({ movieId, onBack }: MovieDetailProps) {
 
         <div className="md:col-span-3 space-y-6">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{movie.title}</h1>
-            <p className="text-gray-600 dark:text-gray-400 text-lg">
-              {movie.release_date && movie.release_date.split("-")[0]}
-            </p>
+            <h1 className="text-4xl font-bold text-white mb-2">{movie.title}</h1>
+            <p className="text-gray-400 text-lg">{movie.release_date && movie.release_date.split("-")[0]}</p>
           </div>
 
           {/* Rating and Details */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Rating</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                ⭐ {movie.vote_average?.toFixed(1) || "N/A"}
-              </div>
+            <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+              <div className="text-sm text-gray-400 mb-1">Rating</div>
+              <div className="text-2xl font-bold text-white">⭐ {movie.vote_average?.toFixed(1) || "N/A"}</div>
             </div>
-            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Runtime</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{movie.Runtime || "N/A"}</div>
+            <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+              <div className="text-sm text-gray-400 mb-1">Runtime</div>
+              <div className="text-2xl font-bold text-white">{movie.runtime || "N/A"}</div>
             </div>
-            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Genres</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+            <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+              <div className="text-sm text-gray-400 mb-1">Genres</div>
+              <div className="text-2xl font-bold text-white">
                 {movie.genres
                   ?.slice(0, 1)
                   .map((g) => g.name)
@@ -126,20 +124,27 @@ export default function MovieDetail({ movieId, onBack }: MovieDetailProps) {
             </div>
           </div>
 
+          {videoKey && (
+            <button
+              onClick={() => window.open(`https://www.youtube.com/watch?v=${videoKey}`, "_blank")}
+              className="button-primary w-full hover:shadow-lg"
+            >
+              ▶️ Watch Trailer
+            </button>
+          )}
+
           {/* Overview */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Overview</h3>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-              {movie.overview || movie.Plot || "No overview available"}
-            </p>
+            <h3 className="text-lg font-semibold text-white mb-2">Overview</h3>
+            <p className="text-gray-300 leading-relaxed">{movie.overview || movie.Plot || "No overview available"}</p>
           </div>
         </div>
       </div>
 
       {/* Where to Watch Section */}
       {allWatchProviders.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Where to Watch</h2>
+        <div className="bg-gray-900 border border-gray-700 rounded-lg p-8">
+          <h2 className="text-2xl font-bold text-white mb-6">Where to Watch</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {allWatchProviders.map((provider) => (
               <PlatformCard
@@ -147,26 +152,27 @@ export default function MovieDetail({ movieId, onBack }: MovieDetailProps) {
                 platformName={provider.provider_name}
                 logoPath={provider.logo_path}
                 movieTitle={movie.title}
+                movieId={movieId}
                 isClickable={true}
               />
             ))}
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-4">
-            Availability varies by region. Showing options for India region. Links open search on platform.
+          <p className="text-sm text-gray-400 mt-4">
+            Opens in new tab. Availability varies by region. Showing options for India region.
           </p>
         </div>
       )}
 
       {allWatchProviders.length === 0 && (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
-          <p className="text-gray-600 dark:text-gray-400">Currently not available for streaming in your region</p>
+        <div className="bg-gray-900 border border-gray-700 rounded-lg p-8 text-center">
+          <p className="text-gray-400">Currently not available for streaming in your region</p>
         </div>
       )}
 
       {/* Recommendations */}
       {recommendations.length > 0 && (
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Similar Movies</h2>
+          <h2 className="text-2xl font-bold text-white mb-6">Similar Movies</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {recommendations.slice(0, 10).map((rec) => (
               <MovieCard key={rec.id} movie={rec} onMovieClick={() => setSelectedMovie(rec)} />
@@ -178,10 +184,10 @@ export default function MovieDetail({ movieId, onBack }: MovieDetailProps) {
       {/* Selected Movie Detail Modal */}
       {selectedMovie && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-gray-900 border border-gray-700 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setSelectedMovie(null)}
-              className="sticky top-4 left-4 px-3 py-1 rounded-lg bg-blue-600 dark:bg-white hover:bg-blue-700 dark:hover:bg-gray-200 text-white dark:text-black transition-colors"
+              className="sticky top-4 left-4 px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
             >
               ✕ Close
             </button>

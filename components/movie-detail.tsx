@@ -31,6 +31,7 @@ export default function MovieDetail({ movieId, onBack }: MovieDetailProps) {
   const [videoKey, setVideoKey] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedMovie, setSelectedMovie] = useState<EnrichedMovie | null>(null)
+  const [showTrailerModal, setShowTrailerModal] = useState(false)
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -74,11 +75,22 @@ export default function MovieDetail({ movieId, onBack }: MovieDetailProps) {
     )
   }
 
-  const allWatchProviders = [
+  // Remove duplicate watch providers and combine all types
+  const allWatchProvidersRaw = [
     ...(watchProviders?.flatrate || []),
     ...(watchProviders?.buy || []),
     ...(watchProviders?.rent || []),
   ]
+  
+  // Deduplicate based on provider_id
+  const uniqueProviderIds = new Set<number>()
+  const allWatchProviders = allWatchProvidersRaw.filter((provider) => {
+    if (uniqueProviderIds.has(provider.provider_id)) {
+      return false
+    }
+    uniqueProviderIds.add(provider.provider_id)
+    return true
+  })
 
   return (
     <div className="space-y-8 animate-in fade-in">
@@ -126,11 +138,17 @@ export default function MovieDetail({ movieId, onBack }: MovieDetailProps) {
 
           {videoKey && (
             <button
-              onClick={() => window.open(`https://www.youtube.com/watch?v=${videoKey}`, "_blank")}
+              onClick={() => setShowTrailerModal(true)}
               className="button-primary w-full hover:shadow-lg"
             >
               ▶️ Watch Trailer
             </button>
+          )}
+          
+          {!videoKey && (
+            <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 text-center">
+              <p className="text-gray-400">Trailer not available</p>
+            </div>
           )}
 
           {/* Overview */}
@@ -177,6 +195,34 @@ export default function MovieDetail({ movieId, onBack }: MovieDetailProps) {
             {recommendations.slice(0, 10).map((rec) => (
               <MovieCard key={rec.id} movie={rec} onMovieClick={() => setSelectedMovie(rec)} />
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Trailer Modal */}
+      {showTrailerModal && videoKey && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-lg max-w-4xl w-full">
+            <div className="flex justify-between items-center p-4 border-b border-gray-700">
+              <h3 className="text-xl font-bold text-white">{movie?.title} - Trailer</h3>
+              <button
+                onClick={() => setShowTrailerModal(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="aspect-video w-full bg-black">
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${videoKey}?autoplay=1`}
+                title={`${movie?.title} Trailer`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="rounded-b-lg"
+              />
+            </div>
           </div>
         </div>
       )}

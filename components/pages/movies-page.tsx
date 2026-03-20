@@ -16,6 +16,7 @@ export default function MoviesPage() {
   const [selectedYearRange, setSelectedYearRange] = useState("")
   const [selectedGenre, setSelectedGenre] = useState("")
   const [selectedLanguage, setSelectedLanguage] = useState("en-US")
+  const [selectedRating, setSelectedRating] = useState("")
 
   const parseYearRange = (range: string): { start?: string; end?: string } => {
     if (!range) return {}
@@ -63,6 +64,20 @@ export default function MoviesPage() {
     setSelectedLanguage(language)
   }
 
+  const handleRatingChange = (rating: string) => {
+    setSelectedRating(rating)
+    // Filter existing movies by rating
+    if (movies.length > 0) {
+      const ratingThreshold = parseFloat(rating)
+      if (!isNaN(ratingThreshold)) {
+        const filtered = movies.filter(
+          (movie) => movie.vote_average && movie.vote_average >= ratingThreshold
+        )
+        setMovies(filtered)
+      }
+    }
+  }
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-background via-background to-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -79,9 +94,11 @@ export default function MoviesPage() {
             onYearRangeChange={handleYearRangeChange}
             onGenreChange={handleGenreChange}
             onLanguageChange={handleLanguageChange}
+            onRatingChange={handleRatingChange}
             selectedYearRange={selectedYearRange}
             selectedGenre={selectedGenre}
             selectedLanguage={selectedLanguage}
+            selectedRating={selectedRating}
           />
         </div>
 

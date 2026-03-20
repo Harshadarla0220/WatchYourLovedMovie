@@ -37,9 +37,38 @@ export default function MoviesPage() {
   const handleSearch = async (query: string) => {
     setIsLoading(true)
     setHasSearched(true)
-    const results = await getTrendingMovies(selectedLanguage)
-    const enriched = await enrichMovies(results)
-    setMovies(enriched)
+    try {
+      // Use the TMDB search API endpoint
+      const response = await fetch(
+        `/api/tmdb/search?query=${encodeURIComponent(query)}&language=${selectedLanguage}`
+      )
+      const data = await response.json()
+      
+      if (data.results && data.results.length > 0) {
+        // Map TMDB results to EnrichedMovie format
+        const mappedResults = data.results.map((movie: any) => ({
+          id: movie.id,
+          title: movie.title,
+          original_title: movie.original_title,
+          release_date: movie.release_date,
+          poster_path: movie.poster_path,
+          backdrop_path: movie.backdrop_path,
+          overview: movie.overview,
+          vote_average: movie.vote_average,
+          vote_count: movie.vote_count,
+          genre_ids: movie.genre_ids,
+          popularity: movie.popularity,
+        }))
+        
+        const enriched = await enrichMovies(mappedResults)
+        setMovies(enriched)
+      } else {
+        setMovies([])
+      }
+    } catch (error) {
+      console.error("[v0] Search error:", error)
+      setMovies([])
+    }
     setIsLoading(false)
   }
 

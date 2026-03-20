@@ -11,6 +11,7 @@ import type { EnrichedMovie } from "@/lib/tmdb/client"
 
 export default function MoviesPage() {
   const [movies, setMovies] = useState<EnrichedMovie[]>([])
+  const [originalMovies, setOriginalMovies] = useState<EnrichedMovie[]>([]) // Store original unfiltered list
   const [isLoading, setIsLoading] = useState(false)
   const [hasSearched, setHasSearched] = useState(false)
   const [selectedYearRange, setSelectedYearRange] = useState("")
@@ -61,13 +62,17 @@ export default function MoviesPage() {
         }))
         
         const enriched = await enrichMovies(mappedResults)
+        setOriginalMovies(enriched) // Store original list
         setMovies(enriched)
+        setSelectedRating("") // Reset rating filter when searching
       } else {
         setMovies([])
+        setOriginalMovies([])
       }
     } catch (error) {
       console.error("[v0] Search error:", error)
       setMovies([])
+      setOriginalMovies([])
     }
     setIsLoading(false)
   }
@@ -78,12 +83,14 @@ export default function MoviesPage() {
 
   const handleGenreChange = async (genre: string) => {
     setSelectedGenre(genre)
+    setSelectedRating("") // Reset rating filter when changing genre
     if (genre) {
       setIsLoading(true)
       setHasSearched(true)
       const { start, end } = parseYearRange(selectedYearRange)
       const results = await getMoviesByGenre(genre, selectedLanguage, start, end)
       const enriched = await enrichMovies(results)
+      setOriginalMovies(enriched) // Store original list
       setMovies(enriched)
       setIsLoading(false)
     }
@@ -95,15 +102,18 @@ export default function MoviesPage() {
 
   const handleRatingChange = (rating: string) => {
     setSelectedRating(rating)
-    // Filter existing movies by rating
-    if (movies.length > 0) {
+    // Filter from original movies list, not the current filtered list
+    if (rating && originalMovies.length > 0) {
       const ratingThreshold = parseFloat(rating)
       if (!isNaN(ratingThreshold)) {
-        const filtered = movies.filter(
+        const filtered = originalMovies.filter(
           (movie) => movie.vote_average && movie.vote_average >= ratingThreshold
         )
         setMovies(filtered)
       }
+    } else if (!rating) {
+      // If "All Ratings" is selected, show all original movies
+      setMovies(originalMovies)
     }
   }
 

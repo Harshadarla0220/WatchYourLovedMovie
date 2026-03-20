@@ -92,6 +92,9 @@ export default function MovieDetail({ movieId, onBack }: MovieDetailProps) {
     return true
   })
 
+  // Check if there are any actual available platforms
+  const hasAvailablePlatforms = allWatchProviders && allWatchProviders.length > 0
+
   return (
     <div className="space-y-8 animate-in fade-in">
       {/* Back Button */}
@@ -181,9 +184,9 @@ export default function MovieDetail({ movieId, onBack }: MovieDetailProps) {
         </div>
       )}
 
-      {allWatchProviders.length === 0 && (
+      {!hasAvailablePlatforms && (
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-8 text-center">
-          <p className="text-gray-400">Currently not available for streaming in your region</p>
+          <p className="text-gray-400">👉 Not available on streaming platforms</p>
         </div>
       )}
 

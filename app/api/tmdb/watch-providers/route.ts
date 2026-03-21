@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-const TMDB_API_KEY = "a3403cf3418752d8d73b9c9cc1f57858"
+const TMDB_API_KEY = "745e92509d5e34e04acb60fce0874abc"
 const TMDB_BASE_URL = "https://api.themoviedb.org/3"
 
 export async function GET(request: Request) {

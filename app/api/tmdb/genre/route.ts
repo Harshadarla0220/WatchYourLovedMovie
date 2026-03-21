@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-const TMDB_API_KEY = process.env.TMDG_API_KEY
+const TMDB_API_KEY = process.env.TMDB_API_KEY
 const TMDB_BASE_URL = "https://api.themoviedb.org/3"
 
 const GENRE_MAP: Record<string, number> = {

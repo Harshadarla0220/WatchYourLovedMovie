@@ -18,6 +18,7 @@ export default function MoviesPage() {
   const [selectedGenre, setSelectedGenre] = useState("")
   const [selectedLanguage, setSelectedLanguage] = useState("en-US")
   const [selectedRating, setSelectedRating] = useState("")
+  const [currentSearchQuery, setCurrentSearchQuery] = useState("") // Store current search query
 
   const parseYearRange = (range: string): { start?: string; end?: string } => {
     if (!range) return {}
@@ -38,6 +39,9 @@ export default function MoviesPage() {
   const handleSearch = async (query: string) => {
     setIsLoading(true)
     setHasSearched(true)
+    setCurrentSearchQuery(query) // Store search query
+    setSelectedRating("") // Reset rating filter when searching
+    setSelectedGenre("") // Reset genre filter when searching
     try {
       // Use the TMDB search API endpoint
       const response = await fetch(
@@ -64,7 +68,6 @@ export default function MoviesPage() {
         const enriched = await enrichMovies(mappedResults)
         setOriginalMovies(enriched) // Store original list
         setMovies(enriched)
-        setSelectedRating("") // Reset rating filter when searching
       } else {
         setMovies([])
         setOriginalMovies([])
@@ -79,12 +82,26 @@ export default function MoviesPage() {
 
   const handleYearRangeChange = (range: string) => {
     setSelectedYearRange(range)
+    // If currently searching, apply the year filter to search results
+    if (currentSearchQuery && originalMovies.length > 0) {
+      const filtered = applyAllFilters(originalMovies)
+      setMovies(filtered)
+    }
   }
 
   const handleGenreChange = async (genre: string) => {
     setSelectedGenre(genre)
     setSelectedRating("") // Reset rating filter when changing genre
-    if (genre) {
+
+    // If we're in a search context, don't switch to genre browsing
+    if (currentSearchQuery) {
+      // Just apply filters to current search results
+      if (originalMovies.length > 0) {
+        const filtered = applyAllFilters(originalMovies)
+        setMovies(filtered)
+      }
+    } else if (genre) {
+      // If not searching, use genre browsing
       setIsLoading(true)
       setHasSearched(true)
       const { start, end } = parseYearRange(selectedYearRange)
@@ -103,18 +120,48 @@ export default function MoviesPage() {
   const handleRatingChange = (rating: string) => {
     setSelectedRating(rating)
     // Filter from original movies list, not the current filtered list
-    if (rating && originalMovies.length > 0) {
-      const ratingThreshold = parseFloat(rating)
+    if (originalMovies.length > 0) {
+      if (rating) {
+        const ratingThreshold = parseFloat(rating)
+        if (!isNaN(ratingThreshold)) {
+          const filtered = originalMovies.filter(
+            (movie) => movie.vote_average && movie.vote_average >= ratingThreshold
+          )
+          setMovies(filtered)
+        }
+      } else {
+        // If "All Ratings" is selected, show all original movies
+        setMovies(originalMovies)
+      }
+    }
+  }
+
+  const applyAllFilters = (moviesToFilter: EnrichedMovie[]) => {
+    let filtered = [...moviesToFilter]
+
+    // Apply year filter
+    if (selectedYearRange) {
+      const { start, end } = parseYearRange(selectedYearRange)
+      filtered = filtered.filter((movie) => {
+        const year = movie.release_date?.split("-")[0]
+        if (!year) return false
+        if (start && year < start) return false
+        if (end && year > end) return false
+        return true
+      })
+    }
+
+    // Apply rating filter
+    if (selectedRating) {
+      const ratingThreshold = parseFloat(selectedRating)
       if (!isNaN(ratingThreshold)) {
-        const filtered = originalMovies.filter(
+        filtered = filtered.filter(
           (movie) => movie.vote_average && movie.vote_average >= ratingThreshold
         )
-        setMovies(filtered)
       }
-    } else if (!rating) {
-      // If "All Ratings" is selected, show all original movies
-      setMovies(originalMovies)
     }
+
+    return filtered
   }
 
   return (

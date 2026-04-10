@@ -6,7 +6,11 @@ const TMDB_BASE_URL = "https://api.themoviedb.org/3"
 export async function GET(request: Request) {
   try {
     if (!TMDB_API_KEY) {
-      return NextResponse.json({ error: "TMDB API key not configured" }, { status: 500 })
+      console.error("[v0] TMDB API key not configured")
+      return NextResponse.json(
+        { results: [], error: "API key not configured" },
+        { status: 500 }
+      )
     }
 
     const { searchParams } = new URL(request.url)
@@ -15,18 +19,32 @@ export async function GET(request: Request) {
     const page = searchParams.get("page") || "1"
 
     if (!query || query.trim().length === 0) {
-      return NextResponse.json({ error: "Search query is required" }, { status: 400 })
+      return NextResponse.json(
+        { results: [] },
+        { status: 200 }
+      )
     }
 
     const url = `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=${language}&page=${page}&include_adult=false`
 
-    const response = await fetch(url)
-    const data = await response.json()
+    console.log("[v0] Fetching from TMDB:", url.replace(TMDB_API_KEY, "***"))
+
+    const response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
 
     if (!response.ok) {
-      console.error("[v0] TMDB search error:", data)
-      return NextResponse.json({ error: "Failed to search movies" }, { status: 500 })
+      const errorData = await response.json().catch(() => ({}))
+      console.error("[v0] TMDB API error:", response.status, errorData)
+      return NextResponse.json(
+        { results: [], error: "TMDB API error" },
+        { status: 200 } // Return 200 with empty results so client doesn't show error
+      )
     }
+
+    const data = await response.json()
 
     return NextResponse.json({
       results: data.results || [],
@@ -36,6 +54,9 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error("[v0] Error searching movies:", error)
-    return NextResponse.json({ error: "Failed to search movies" }, { status: 500 })
+    return NextResponse.json(
+      { results: [], error: String(error) },
+      { status: 200 } // Return 200 with empty results
+    )
   }
 }

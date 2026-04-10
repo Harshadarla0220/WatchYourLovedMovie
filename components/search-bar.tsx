@@ -20,6 +20,7 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [suggestionsLoading, setSuggestionsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const suggestionsRef = useRef<NodeJS.Timeout | null>(null)
 
   // Fetch suggestions as user types
@@ -31,25 +32,38 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
     if (query.trim().length < 2) {
       setSuggestions([])
       setShowSuggestions(false)
+      setError(null)
       return
     }
 
     setSuggestionsLoading(true)
+    setError(null)
     suggestionsRef.current = setTimeout(async () => {
       try {
         const response = await fetch(
           `/api/tmdb/search?query=${encodeURIComponent(query)}&language=en-US`
         )
+        
+        if (!response.ok) {
+          setError("Failed to fetch suggestions. Please try again.")
+          setSuggestions([])
+          setSuggestionsLoading(false)
+          return
+        }
+
         const data = await response.json()
 
         if (data.results && data.results.length > 0) {
           setSuggestions(data.results.slice(0, 8)) // Show top 8 suggestions
           setShowSuggestions(true)
+          setError(null)
         } else {
           setSuggestions([])
+          setShowSuggestions(true)
         }
-      } catch (error) {
-        console.error("[v0] Error fetching suggestions:", error)
+      } catch (err) {
+        console.error("[v0] Error fetching suggestions:", err)
+        setError("Network error. Please check your connection.")
         setSuggestions([])
       } finally {
         setSuggestionsLoading(false)
@@ -86,7 +100,7 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
           />
 
           {/* Suggestions Dropdown */}
-          {showSuggestions && suggestions.length > 0 && (
+          {showSuggestions && suggestions.length > 0 && !suggestionsLoading && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-gray-600 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
               {suggestions.map((suggestion) => (
                 <button
@@ -95,13 +109,20 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
                   onClick={() => handleSuggestionClick(suggestion)}
                   className="w-full px-4 py-3 text-left hover:bg-gray-800 border-b border-gray-700 last:border-b-0 transition-colors flex items-center gap-3"
                 >
-                  {suggestion.poster_path && (
-                    <img
-                      src={`https://image.tmdb.org/t/p/w45${suggestion.poster_path}`}
-                      alt={suggestion.title}
-                      className="w-8 h-12 object-cover rounded"
-                    />
-                  )}
+                  <div className="w-8 h-12 bg-gray-800 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
+                    {suggestion.poster_path ? (
+                      <img
+                        src={`https://image.tmdb.org/t/p/w45${suggestion.poster_path}`}
+                        alt={suggestion.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          ;(e.target as HTMLImageElement).style.display = "none"
+                        }}
+                      />
+                    ) : (
+                      <span className="text-xs text-gray-500">No Image</span>
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-white truncate font-medium">{suggestion.title}</div>
                     {suggestion.release_date && (
@@ -115,9 +136,24 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
             </div>
           )}
 
+          {/* Error message */}
+          {error && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-red-600 rounded-lg p-4 text-center text-red-400 z-50">
+              {error}
+            </div>
+          )}
+
+          {/* No results message */}
+          {showSuggestions && !suggestionsLoading && query.trim().length >= 2 && suggestions.length === 0 && !error && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-gray-600 rounded-lg p-4 text-center text-gray-400 z-50">
+              No movies found for "{query}"
+            </div>
+          )}
+
           {/* Loading indicator */}
-          {suggestionsLoading && query.trim().length >= 2 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-gray-600 rounded-lg p-3 text-center text-gray-400">
+          {suggestionsLoading && query.trim().length >= 2 && !error && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-gray-600 rounded-lg p-3 text-center text-gray-400 z-50 flex items-center justify-center gap-2">
+              <span className="inline-block w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
               Loading suggestions...
             </div>
           )}

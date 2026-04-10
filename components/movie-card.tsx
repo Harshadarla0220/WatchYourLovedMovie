@@ -38,18 +38,23 @@ export default function MovieCard({ movie, onFavoriteChange }: MovieCardProps) {
     onFavoriteChange?.()
   }
 
-  const posterUrl = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "/placeholder.svg"
+  const [posterError, setPosterError] = useState(false)
+  const posterUrl = movie.poster_path 
+    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` 
+    : null
+  const displayPosterUrl = posterError || !posterUrl ? "/placeholder.svg" : posterUrl
 
   return (
     <Link href={`/movie/${movie.id}`} className="group cursor-pointer">
       <div className="overflow-hidden hover-lift transition-all duration-300 h-full flex flex-col bg-gray-900 border border-gray-700 rounded-xl hover:border-blue-400">
         {/* Movie Poster */}
-        <div className="relative h-64 bg-gray-800 overflow-hidden">
+        <div className="relative h-64 bg-gray-800 overflow-hidden rounded-t-xl">
           <img
-            src={posterUrl || "/placeholder.svg"}
+            src={displayPosterUrl}
             alt={movie.title}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
             loading="lazy"
+            onError={() => setPosterError(true)}
           />
         </div>
 
